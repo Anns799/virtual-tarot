@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Tarot - Peter Answers Style</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: #ffffff;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #5c061c;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 13px;
+            color: #ddd;
+        }
+        .form-body {
+            padding: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .btn {
+            width: 100%;
+            background-color: #5c061c;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #430413;
+        }
+        /* Microphone Permission Section */
+        #mic-section {
+            background: #fff3f3;
+            border: 1px dashed #5c061c;
+            padding: 12px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #mic-section p {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            color: #5c061c;
+            font-weight: bold;
+        }
+        #mic-btn {
+            background-color: #5c061c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Virtual Tarot</h1>
+        <p>Ask your question and uncover the mystery</p>
+    </div>
+    
+    <div class="form-body">
+        <!-- Microphone Permission Box -->
+        <div id="mic-section">
+            <p>Please allow microphone access to proceed</p>
+            <button id="mic-btn" onclick="requestMicPermission()">Allow Microphone</button>
+        </div>
+
+        <div class="form-group">
+            <label>Petition *</label>
+            <input type="text" id="petition" placeholder="e.g. Peter please answer...">
+        </div>
+        
+        <div class="form-group">
+            <label>Question *</label>
+            <input type="text" id="question" placeholder="Type your question here...">
+        </div>
+        
+        <button class="btn" onclick="submitForm()">Send question</button>
+    </div>
+</div>
+
+<script>
+    // Jaise hi user "Allow Microphone" par click karega, permission mange ga aur box gayab ho jayega
+    async function requestMicPermission() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // Permission milte hi mic-section ko screen se gayab (hide) kar dein
+            document.getElementById('mic-section').style.display = 'none';
+            console.log("Microphone permission granted!");
+        } catch (error) {
+            alert("Microphone permission denied or not available!");
+        }
+    }
+
+    function submitForm() {
+        const petition = document.getElementById('petition').value;
+        const question = document.getElementById('question').value;
+        if(!petition || !question) {
+            alert("Please fill both fields!");
+            return;
+        }
+        alert("Question sent successfully!");
+    }
+</script>
+
+</body>
+</html>
