@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Tarot - Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .admin-container {
+            background: #2b2b2b;
+            width: 450px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border: 1px solid #444;
+        }
+        h2 { color: #ff4d4d; text-align: center; margin-top: 0; }
+        .live-box {
+            background: #111;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 80px;
+            border: 1px solid #555;
+            font-size: 20px;
+            color: #00ffcc;
+            margin-top: 15px;
+            word-break: break-all;
+        }
+        .label { font-size: 13px; color: #aaa; margin-top: 15px; display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <h2>Admin Live Monitor</h2>
+        <span class="label">User jo mic mein bol raha hai (Live Urdu Text):</span>
+        <div class="live-box" id="liveQuestionDisplay">Intezaar kar rahe hain... User ke bolne par yahan live dikhega.</div>
+    </div>
+
+    <!-- Firebase SDKs (Compat version v9) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAemDpPPNGO__dTh8-InzNa38WokRCz9g",
+            authDomain: "virtual-tarot-b76aa.firebaseapp.com",
+            databaseURL: "https://virtual-tarot-b76aa-default-rtdb.firebaseio.com",
+            projectId: "virtual-tarot-b76aa",
+            storageBucket: "virtual-tarot-b76aa.firebasestorage.app",
+            messagingSenderId: "125719219889",
+            appId: "1:125719219889:web:059d98a5e8ed2e91f75c90",
+            measurementId: "G-E4399ZE0L0"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const liveDisplay = document.getElementById('liveQuestionDisplay');
+
+        // Firebase Realtime Database se live sunna
+        db.ref('liveQuestion').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.text) {
+                liveDisplay.innerText = data.text;
+            } else {
+                liveDisplay.innerText = "Kuch nahi bola abhi...";
+            }
+        });
+    </script>
+</body>
+</html>
