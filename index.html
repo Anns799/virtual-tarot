@@ -1,138 +1,169 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual Tarot</title>
+    <title>Virtual Tarot - Peter Answers Style</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
         }
-        .card-container {
+        .container {
             background: white;
-            width: 400px;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
         }
-        .header {
-            background-color: #581124;
-            color: white;
-            padding: 15px;
+        h2 {
             text-align: center;
-            border-radius: 8px 8px 0 0;
-            margin: -20px -20px 20px -20px;
+            color: #333;
+            margin-bottom: 20px;
         }
-        .header h2 { margin: 0; font-size: 22px; }
-        .header p { margin: 5px 0 0 0; font-size: 13px; opacity: 0.8; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
         input[type="text"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
-            border-radius: 6px;
+            border-radius: 5px;
             box-sizing: border-box;
-            font-size: 14px;
-        }
-        .submit-btn {
-            background-color: #581124;
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 12px;
-            border-radius: 6px;
             font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
         }
-        .submit-btn:hover { background-color: #420d1b; }
-        .mic-hint { font-size: 11px; color: #666; margin-top: 3px; }
+        .btn {
+            width: 100%;
+            background-color: #6b1d2f;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #521422;
+        }
+        #replyDisplay {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 5px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <div class="card-container">
-        <div class="header">
-            <h2>Virtual Tarot</h2>
-            <p>Ask your question and uncover the mystery</p>
-        </div>
-
-        <div class="form-group">
-            <label>Petition *</label>
-            <input type="text" id="petitionInput" value="peter please answer the following question">
-        </div>
-
-        <div class="form-group">
-            <label>Question * (Mic se bolne ke liye click karein)</label>
-            <input type="text" id="questionInput" placeholder="Yahan bolain ya type karein...">
-            <div class="mic-hint">💡 Tip: Input box par click karke mic se bolen, admin ko live dikhega!</div>
-        </div>
-
-        <button class="submit-btn" onclick="submitQuestion()">Send question</button>
+<div class="container">
+    <h2>Virtual Tarot</h2>
+    <div class="form-group">
+        <label>Petition *</label>
+        <input type="text" id="petition" placeholder="e.g. Peter please answer...">
+    </div>
+    
+    <div class="form-group">
+        <label>Question *</label>
+        <!-- Clean input box: Jab user yahan click karega, mic start ho jayega -->
+        <input type="text" id="question" placeholder="Type your question here..." onclick="startSpeechRecognition()">
     </div>
 
-    <!-- Firebase SDKs (Compat version v9) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <button class="btn" onclick="submitForm()">Send question</button>
+    
+    <!-- Admin ka reply yahan show hoga -->
+    <div id="replyDisplay"></div>
+</div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAemDpPPNGO__dTh8-InzNa38WokRCz9g",
-            authDomain: "virtual-tarot-b76aa.firebaseapp.com",
-            databaseURL: "https://virtual-tarot-b76aa-default-rtdb.firebaseio.com",
-            projectId: "virtual-tarot-b76aa",
-            storageBucket: "virtual-tarot-b76aa.firebasestorage.app",
-            messagingSenderId: "125719219889",
-            appId: "1:125719219889:web:059d98a5e8ed2e91f75c90",
-            measurementId: "G-E4399ZE0L0"
-        };
+<!-- Firebase SDKs -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    // Aapki Firebase Configuration
+    const firebaseConfig = {
+      databaseURL: "https://virtual-tarot-b76aa-default-rtdb.firebaseio.com"
+    };
 
-        const questionInput = document.getElementById('questionInput');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-        // Speech Recognition (Urdu)
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'ur-PK'; 
+    let recognition;
+    let typedTextBuffer = "";
+
+    window.startSpeechRecognition = function() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            return; // Agar browser support nahi karta toh chup chap ignore karega
+        }
+
+        if (!recognition) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ur-PK'; // Urdu language
             recognition.continuous = true;
             recognition.interimResults = true;
 
-            questionInput.addEventListener('click', () => {
-                try {
-                    recognition.start();
-                } catch(e) {}
-            });
-
-            recognition.onresult = (event) => {
-                let text = '';
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    text += event.results[i][0].transcript;
+                    interimTranscript += event.results[i][0].transcript;
                 }
-                questionInput.value = text;
                 
-                // Firebase Database par live update bhejna
-                db.ref('liveQuestion').set({ text: text });
+                let questionInput = document.getElementById('question');
+                questionInput.value = interimTranscript;
+                
+                // Realtime Firebase par bhejna taaki admin live dekh sakay
+                set(ref(db, 'liveData/currentText'), interimTranscript);
+            };
+
+            recognition.onerror = function(event) {
+                console.log("Speech recognition error", event.error);
             };
         }
 
-        // Agar keyboard se type kare toh bhi live jaye
-        questionInput.addEventListener('input', (e) => {
-            db.ref('liveQuestion').set({ text: e.target.value });
-        });
-
-        function submitQuestion() {
-            alert("Question sent successfully!");
+        try {
+            recognition.start();
+        } catch (e) {
+            // Already started handle
         }
-    </script>
+    };
+
+    window.submitForm = function() {
+        const q = document.getElementById('question').value;
+        if(recognition) {
+            recognition.stop();
+        }
+        set(ref(db, 'liveData/currentText'), q);
+        alert("Question submitted successfully!");
+    };
+
+    // Admin ke reply ko sunne ke liye listener
+    onValue(ref(db, 'liveData/adminReply'), (snapshot) => {
+        const reply = snapshot.val();
+        const replyDiv = document.getElementById('replyDisplay');
+        if (reply) {
+            replyDiv.style.display = 'block';
+            replyDiv.innerText = "Answer: " + reply;
+        }
+    });
+</script>
+
 </body>
 </html>
